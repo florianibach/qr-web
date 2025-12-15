@@ -25,3 +25,9 @@ Then open:
 `
 http://localhost:8088
 `
+### Notes
+
+- Default error correction level: Q (recommended)
+- For larger logos, use Q or H ECC
+- No data is stored – everything runs in-memory
+
