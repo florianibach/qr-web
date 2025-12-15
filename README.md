@@ -16,7 +16,7 @@ A lightweight, self-hosted QR code generator with a clean web interface.
 ```yaml
 services:
   qr-web:
-    image: YOURUSER/qr-web:latest
+    image: floibach/qr-web:latest
     ports:
       - "8088:8000"
     restart: unless-stopped
