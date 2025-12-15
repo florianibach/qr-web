@@ -1,5 +1,5 @@
 # QR Code Generator (Web UI)
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/<owner>/<repo>)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue?logo=github)](https://github.com/florianibach/qr-web)
 
 A lightweight, self-hosted QR code generator with a clean web interface.
 
