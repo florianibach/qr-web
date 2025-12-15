@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>QR Generator</title>
+  <link rel="icon" href="/static/favicon.ico" sizes="any">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body { font-family: system-ui, sans-serif; max-width: 900px; margin: 24px auto; padding: 0 16px; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 16px; }
+    label { display:block; margin-top: 12px; font-weight: 600; }
+    select {background-color: transparent;}
+    input, select, button {  font: inherit;}
+    input, select { width: 100%; padding: 10px; margin-top: 6px; border: 1px solid #999; border-radius: 4px;}
+    button { padding: 10px 14px; margin-top: 14px; cursor: pointer; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .out { margin-top: 16px; display: grid; grid-template-columns: 1fr; gap: 12px; }
+    img { max-width: 320px; border: 1px solid #eee; border-radius: 12px; }
+    .label-with-icon {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-weight: 600;
+      margin-top: 12px;
+    }
+
+    .info-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+    }
+
+    .info-link .material-symbols-outlined {
+      font-size: 18px;
+      color: #1a73e8; /* Material Blue */
+      cursor: pointer;
+    }
+
+    .info-link:hover .material-symbols-outlined {
+      color: #174ea6;
+    }
+
+
+    @media (max-width: 720px) { .row { grid-template-columns: 1fr; } }    
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+</head>
+<body>
+  <h1>QR-Code Generator</h1>
+
+  <div class="card">
+    <form id="f">
+      <label>Text / URL</label>
+      <input name="text" placeholder="https://dein-link..." required />
+
+      <div class="row">
+        <div>
+          <label>Größe (px)</label>
+          <input name="size" type="number" value="512" min="128" max="2048" />
+        </div>
+        <div>
+         <label class="label-with-icon">
+            Fehlerkorrektur (für Logo eher Q/H)
+
+            <a href="#" id="eccInfoBtn" class="info-link" aria-label="Info">
+              <span class="material-symbols-outlined">info</span>
+            </a>
+          </label>
+
+          <select name="ecc">
+            <option value="L">L</option>
+            <option value="M">M</option>
+            <option value="Q" selected>Q (default)</option>
+            <option value="H">H</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Rand (Border)</label>
+          <input name="border" type="number" value="4" min="1" max="20" />
+        </div>
+        <div>
+          <label>Logo-Größe (% vom QR)</label>
+          <input name="logo_percent" type="number" value="20" min="5" max="40" />
+        </div>
+      </div>
+
+      <label>Logo / Bild (optional)</label>
+      <input name="logo" type="file" accept="image/*" />
+
+      <button type="submit">QR-Code erzeugen</button>
+    </form>
+
+    <div class="out" id="previewCard" style="display:none;">
+      <div>
+        <h3>Vorschau</h3>
+        <img id="preview" alt="QR Preview" style="display:none;"/>
+      </div>
+      <a id="download" download="qrcode.png" style="display:none;">PNG herunterladen</a>
+    </div>
+  </div>
+
+  <div id="eccModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.35);">
+    <div style="background:#fff; max-width:520px; margin:10vh auto; padding:16px; border-radius:12px; border:1px solid #ddd;">
+        <div style="display:flex; justify-content:space-between; align-items:center; gap:12px;">
+        <h3 style="margin:0;">Fehlerkorrektur (ECC)</h3>
+        <button type="button" id="eccCloseBtn" style="width:auto; padding:6px 10px;">Schließen</button>
+        </div>
+
+        <p style="margin:10px 0 12px 0;">
+        Höher = toleranter (z. B. bei Logo/Schmutz), aber QR wird etwas „dichter“.
+        </p>
+
+        <table style="width:100%; border-collapse:collapse;">
+        <thead>
+            <tr>
+            <th style="text-align:left; border-bottom:1px solid #eee; padding:8px;">Level</th>
+            <th style="text-align:left; border-bottom:1px solid #eee; padding:8px;">Fehlertoleranz</th>
+            <th style="text-align:left; border-bottom:1px solid #eee; padding:8px;">Typisch</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr><td style="padding:8px; border-bottom:1px solid #f3f3f3;">L</td><td style="padding:8px; border-bottom:1px solid #f3f3f3;">~7%</td><td style="padding:8px; border-bottom:1px solid #f3f3f3;">max. Datenmenge</td></tr>
+            <tr><td style="padding:8px; border-bottom:1px solid #f3f3f3;">M</td><td style="padding:8px; border-bottom:1px solid #f3f3f3;">~15%</td><td style="padding:8px; border-bottom:1px solid #f3f3f3;">Standard</td></tr>
+            <tr><td style="padding:8px; border-bottom:1px solid #f3f3f3;">Q</td><td style="padding:8px; border-bottom:1px solid #f3f3f3;">~25%</td><td style="padding:8px; border-bottom:1px solid #f3f3f3;"><b>guter Default</b>, Print/Logo</td></tr>
+            <tr><td style="padding:8px;">H</td><td style="padding:8px;">~30%</td><td style="padding:8px;">großes Logo / schwierig</td></tr>
+        </tbody>
+        </table>
+    </div>
+  </div>
+
+
+  <script>
+    const form = document.getElementById("f");
+    const previwCard = document.getElementById("previewCard");
+    const img = document.getElementById("preview");
+    const dl = document.getElementById("download");
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      dl.style.display = "none";
+
+      const fd = new FormData(form);
+      const res = await fetch("/generate", { method: "POST", body: fd });
+
+      if (!res.ok) {
+        alert(await res.text());
+        return;
+      }
+
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+
+      previwCard.style.display = "inline-block";
+      img.src = url;
+      img.style.display = "inline-block";
+      dl.href = url;
+      dl.style.display = "inline-block";
+      dl.textContent = "PNG herunterladen";
+    });
+  </script>
+
+  <script>
+    const eccModal = document.getElementById("eccModal");
+    const eccInfoBtn = document.getElementById("eccInfoBtn");
+    const eccCloseBtn = document.getElementById("eccCloseBtn");
+
+    eccInfoBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      eccModal.style.display = "block";
+    });
+    eccCloseBtn.addEventListener("click", () => eccModal.style.display = "none");
+    eccModal.addEventListener("click", (e) => {
+      if (e.target === eccModal) eccModal.style.display = "none";
+    });
+  </script>
+
+</body>
+</html>
