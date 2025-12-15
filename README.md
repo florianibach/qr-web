@@ -12,7 +12,12 @@ A lightweight, self-hosted QR code generator with a clean web interface.
 - Works perfectly on Raspberry Pi
 
 ## Usage (Docker)
+### docker run
+```
+docker run --rm -p 8088:8000 floibach/qr-web:latest
+```
 
+### docker compose 
 ```yaml
 services:
   qr-web:
@@ -21,11 +26,10 @@ services:
       - "8088:8000"
     restart: unless-stopped
 ```
-
-Then open:
-`
+then open:
+```
 http://localhost:8088
-`
+```
 ### Notes
 
 - Default error correction level: Q (recommended)
