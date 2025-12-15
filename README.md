@@ -19,3 +19,9 @@ services:
     ports:
       - "8088:8000"
     restart: unless-stopped
+```
+
+Then open:
+`
+http://localhost:8088
+`
