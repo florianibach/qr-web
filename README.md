@@ -1,2 +1,21 @@
-# qr-web
-A simple QR Code generator with a docker file and a UI - possible to host on a Raspberry Pi
+# QR Code Generator (Web UI)
+
+A lightweight, self-hosted QR code generator with a clean web interface.
+
+## Features
+- Generate QR codes from text or URLs
+- Optional embedded logo/image (centered)
+- Configurable size, border and error correction (ECC)
+- Mobile-friendly UI
+- Multi-architecture Docker image (amd64 & arm64)
+- Works perfectly on Raspberry Pi
+
+## Usage (Docker)
+
+```yaml
+services:
+  qr-web:
+    image: YOURUSER/qr-web:latest
+    ports:
+      - "8088:8000"
+    restart: unless-stopped
